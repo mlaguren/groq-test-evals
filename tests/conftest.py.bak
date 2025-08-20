@@ -1,0 +1,17 @@
+# tests/conftest.py
+import os
+import pytest
+from dotenv import load_dotenv
+
+# Always load .env before tests run
+load_dotenv(override=True)
+
+@pytest.fixture(scope="session", autouse=True)
+def check_openai_api_key():
+    """
+    Ensure OPENAI_API_KEY is available for tests.
+    Fail fast if it's missing.
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        pytest.fail("OPENAI_API_KEY not set. Check your .env file or environment variables.")
