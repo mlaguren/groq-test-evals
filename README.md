@@ -34,7 +34,7 @@ There are two approaches to running the example test case which would display th
 
 ### Locally
 
-```pytest test/test_deep_evals.py```
+```pytest tests/test_deep_evals.py```
 
 ### Confident AI Dashboard
 
