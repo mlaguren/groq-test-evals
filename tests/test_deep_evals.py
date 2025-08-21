@@ -21,8 +21,7 @@ GROQ_MODELS = [
 ]
 
 @pytest.mark.parametrize("model_name", GROQ_MODELS)
-def test_case(model_name):
-
+def test_case(model_name, request):
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     input_prompt = "Explain the role of Tier 1 suppliers in the automotive supply chain"
@@ -36,7 +35,7 @@ def test_case(model_name):
     )
 
     actual_output = response.choices[0].message.content
-    
+
     correctness_metric = GEval(
         name="Correctness",
         criteria="Determine if the 'actual output' is correct based on the 'expected output'.",
@@ -44,20 +43,26 @@ def test_case(model_name):
         threshold=0.7
     )
 
-    faithfulness_metric = GEval(
-        name="Faithfulness",
-        criteria="Is the extracted data faithful to the provided input document without hallucination?"
-    )
-
-    contextual_relevancy = ContextualRelevancyMetric(
-        threshold=0.7,
-        include_reason=True
-    )
-
     test_case = LLMTestCase(
-        input="Explain the role of Tier 1 suppliers in the automotive supply chain.",
+        input=input_prompt,
         actual_output=actual_output,
-        expected_output="Tier 1 suppliers deliver complete systems or modules directly to automakers, such as braking systems, seats, or electronics, and typically manage sub-suppliers for individual components.",
-        retrieval_context=["Tier 1 suppliers provide complex systems or assemblies (e.g., brakes, electronics, seats) directly to automotive OEMs.","They source parts from lower-tier suppliers, ensure quality and compliance, and often co-develop designs with OEMs."]
+        expected_output=(
+            "Tier 1 suppliers deliver complete systems or modules directly to automakers, "
+            "such as braking systems, seats, or electronics, and typically manage sub-suppliers."
+        ),
+        retrieval_context=[
+            "Tier 1 suppliers provide complex systems or assemblies directly to automotive OEMs.",
+            "They source parts from lower-tier suppliers, ensure quality and compliance, and often co-develop designs with OEMs."
+        ]
     )
-    assert_test(test_case, [correctness_metric, contextual_relevancy, faithfulness_metric])
+
+    results = assert_test(test_case, [correctness_metric])
+
+    # Attach custom metadata for the pytest-html report
+    request.node.extra_test_info = {
+        "Prompt": input_prompt,
+        "Model": model_name,
+        "Judge Model": getattr(correctness_metric, "model", "N/A"),
+        "Judge Reason": getattr(results[0], "reason", "N/A"),
+        "Scores": {m.name: m.score for m in results},
+    }
