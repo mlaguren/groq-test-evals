@@ -28,6 +28,10 @@ This repo demonstrates how to run different evaluation frameworks against models
 
 # Running Test
 
+## Available Models on Groq
+
+Models available on (GroqCloud)[https://console.groq.com/docs/models]
+
 ## DeepEval
 
 There are two approaches to running the example test case which would display the results either locally or on [Confident AI](https://confident-ai.com)
@@ -38,7 +42,7 @@ There are two approaches to running the example test case which would display th
 
 ### Confident AI Dashboard
 
-Login into Confident AI 
+Log in to Confident AI 
 ```deepeval login```
 
 Run test
